@@ -76,25 +76,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     setError(null);
     
+    console.log('Iniciando login para:', email);
+    console.log('Credenciais esperadas: admin@musicschool.com / admin123');
+    console.log('Comparação direta:', email === 'admin@musicschool.com', password === 'admin123');
+    
     try {
       // Simular tempo de resposta da API
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Verificar credenciais hardcoded para desenvolvimento
-      if ((email === 'admin@musicschool.com' && password === 'admin123') ||
-          (email === 'professor@musicschool.com' && password === 'professor123')) {
-        
-        const foundUser = mockCredentials.find(
-          cred => cred.email === email && cred.password === password
-        );
-        
-        if (foundUser) {
-          console.log('Usuário encontrado:', foundUser.user);
-          setUser(foundUser.user);
-          // Salvar no localStorage
-          localStorage.setItem('musicschool_user', JSON.stringify(foundUser.user));
-          return true;
-        }
+      // Credenciais fixas para debug - sempre permitir o login do admin em desenvolvimento
+      if (email === 'admin@musicschool.com' && password === 'admin123') {
+        console.log('Login com admin direto');
+        const adminUser = {
+          id: '1',
+          name: 'Administrador',
+          email: 'admin@musicschool.com',
+          role: 'admin' as const
+        };
+        setUser(adminUser);
+        localStorage.setItem('musicschool_user', JSON.stringify(adminUser));
+        return true;
+      }
+      
+      // Segunda credencial de teste
+      if (email === 'professor@musicschool.com' && password === 'professor123') {
+        console.log('Login com professor direto');
+        const teacherUser = {
+          id: '2',
+          name: 'Professor Demo',
+          email: 'professor@musicschool.com',
+          role: 'teacher' as const
+        };
+        setUser(teacherUser);
+        localStorage.setItem('musicschool_user', JSON.stringify(teacherUser));
+        return true;
       }
       
       // Se chegou aqui, credenciais são inválidas
