@@ -11,6 +11,9 @@ import Professores from '@/pages/Professores';
 import Cursos from '@/pages/Cursos';
 import Aulas from '@/pages/Aulas';
 import Pagamentos from '@/pages/Pagamentos';
+import Comunicacoes from '@/pages/Comunicacoes';
+import Relatorios from '@/pages/Relatorios';
+import MateriaisEducacionais from '@/pages/MateriaisEducacionais';
 
 // Aplicação principal com roteamento
 function App() {
@@ -26,6 +29,9 @@ function App() {
           <Route path="/cursos" component={Cursos} />
           <Route path="/aulas" component={Aulas} />
           <Route path="/pagamentos" component={Pagamentos} />
+          <Route path="/comunicacoes" component={Comunicacoes} />
+          <Route path="/relatorios" component={Relatorios} />
+          <Route path="/materiais" component={MateriaisEducacionais} />
           <Route component={NotFound} />
         </Switch>
       </div>

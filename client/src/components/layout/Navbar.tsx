@@ -11,6 +11,7 @@ export default function Navbar() {
     { name: 'Aulas', path: '/aulas' },
     { name: 'Pagamentos', path: '/pagamentos' },
     { name: 'Comunicações', path: '/comunicacoes' },
+    { name: 'Materiais', path: '/materiais' },
     { name: 'Relatórios', path: '/relatorios' },
   ];
   
