@@ -10,9 +10,11 @@ export default function Navbar() {
     { name: 'Cursos', path: '/cursos' },
     { name: 'Aulas', path: '/aulas' },
     { name: 'Pagamentos', path: '/pagamentos' },
+    { name: 'Despesas', path: '/despesas' },
     { name: 'Comunicações', path: '/comunicacoes' },
     { name: 'Materiais', path: '/materiais' },
     { name: 'Relatórios', path: '/relatorios' },
+    { name: 'Configurações', path: '/configuracoes' },
   ];
   
   return (

@@ -14,6 +14,8 @@ import Pagamentos from '@/pages/Pagamentos';
 import Comunicacoes from '@/pages/Comunicacoes';
 import Relatorios from '@/pages/Relatorios';
 import MateriaisEducacionais from '@/pages/MateriaisEducacionais';
+import Despesas from '@/pages/Despesas';
+import Configuracoes from '@/pages/Configuracoes';
 
 // Aplicação principal com roteamento
 function App() {
@@ -29,9 +31,11 @@ function App() {
           <Route path="/cursos" component={Cursos} />
           <Route path="/aulas" component={Aulas} />
           <Route path="/pagamentos" component={Pagamentos} />
+          <Route path="/despesas" component={Despesas} />
           <Route path="/comunicacoes" component={Comunicacoes} />
-          <Route path="/relatorios" component={Relatorios} />
           <Route path="/materiais" component={MateriaisEducacionais} />
+          <Route path="/relatorios" component={Relatorios} />
+          <Route path="/configuracoes" component={Configuracoes} />
           <Route component={NotFound} />
         </Switch>
       </div>
