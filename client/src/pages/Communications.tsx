@@ -4,10 +4,11 @@ import { CommunicationList } from '@/components/communications/CommunicationList
 import { CommunicationForm } from '@/components/communications/CommunicationForm';
 import MessageTemplatesEditor from '@/components/communications/MessageTemplatesEditor';
 import WhatsAppReminder from '@/components/communications/WhatsAppReminder';
+import WhatsAppMassCommunication from '@/components/communications/WhatsAppMassCommunication';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Mail, MessageSquare, PhoneCall, FileEdit, BellRing } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
+import { Plus, Mail, MessageSquare, PhoneCall, FileEdit, BellRing, Users, Send } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
 export default function Communications() {
@@ -208,7 +209,26 @@ export default function Communications() {
               </p>
             </div>
             
-            <WhatsAppReminder />
+            <Tabs defaultValue="reminders">
+              <TabsList className="w-full mb-6">
+                <TabsTrigger value="reminders" className="flex items-center gap-2">
+                  <BellRing className="h-4 w-4" />
+                  Lembretes Automáticos
+                </TabsTrigger>
+                <TabsTrigger value="mass" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Envio em Massa
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="reminders">
+                <WhatsAppReminder />
+              </TabsContent>
+              
+              <TabsContent value="mass">
+                <WhatsAppMassCommunication />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
           
           {/* Aba de histórico de comunicações */}
