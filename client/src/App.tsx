@@ -8,9 +8,9 @@ import { queryClient } from '@/lib/queryClient';
 
 // Componente de proteção de rota
 function ProtectedRoute({ component: Component, ...rest }: { component: React.FC<any>, path: string }) {
-  const { user, isLoading } = useAuth();
+  const { user, loading } = useAuth();
   
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
