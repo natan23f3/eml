@@ -1,16 +1,16 @@
 import { Switch, Route, Redirect } from 'wouter';
 import { Toaster } from '@/components/ui/toaster';
 import NotFound from '@/pages/not-found';
-import AuthPage from '@/pages/auth-page';
-import { useAuth } from '@/providers/AuthProvider';
+import LoginPage from '@/pages/SimpleLoginPage';
+import { useAuth } from '@/providers/SimpleAuthProvider';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 
 // Componente de proteção de rota
 function ProtectedRoute({ component: Component, ...rest }: { component: React.FC<any>, path: string }) {
-  const { isAuthenticated, loading } = useAuth();
+  const { user, isLoading } = useAuth();
   
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-500 rounded-full animate-spin"></div>
@@ -18,7 +18,7 @@ function ProtectedRoute({ component: Component, ...rest }: { component: React.FC
     );
   }
   
-  if (!isAuthenticated) {
+  if (!user) {
     return <Redirect to="/auth" />;
   }
   
@@ -111,7 +111,7 @@ function App() {
         <Toaster />
         
         <Switch>
-          <Route path="/auth" component={AuthPage} />
+          <Route path="/auth" component={LoginPage} />
           <Route path="/" component={() => <ProtectedRoute path="/" component={Dashboard} />} />
           <Route component={NotFound} />
         </Switch>

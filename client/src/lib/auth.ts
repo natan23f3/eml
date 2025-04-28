@@ -3,14 +3,14 @@ const DEFAULT_USERS = [
   {
     id: '1',
     name: 'Administrador',
-    email: 'admin@musicschool.com',
+    username: 'admin',
     password: 'admin123',
     role: 'admin',
   },
   {
     id: '2',
     name: 'Professor Demo',
-    email: 'professor@musicschool.com',
+    username: 'professor',
     password: 'professor123',
     role: 'teacher',
   },
@@ -19,23 +19,23 @@ const DEFAULT_USERS = [
 export interface User {
   id: string;
   name: string;
-  email: string;
+  username: string;
   role: string;
   avatar?: string;
 }
 
 // Simula login com as credenciais padrão
-export const login = async (email: string, password: string): Promise<User | null> => {
-  console.log(`Tentando login com: ${email} / ${password}`);
+export const login = async (username: string, password: string): Promise<User | null> => {
+  console.log(`Tentando login com: ${username} / ${password}`);
   
   // Delay para simular API
   await new Promise(resolve => setTimeout(resolve, 500));
   
   // Convertemos tudo para minúsculo para evitar problemas de comparação
-  email = email.toLowerCase().trim();
+  username = username.toLowerCase().trim();
   
   const user = DEFAULT_USERS.find(
-    user => user.email.toLowerCase() === email && user.password === password
+    user => user.username.toLowerCase() === username && user.password === password
   );
   
   if (user) {
