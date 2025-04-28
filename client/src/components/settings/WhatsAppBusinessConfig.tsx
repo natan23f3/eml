@@ -796,7 +796,7 @@ export default function WhatsAppBusinessConfig() {
                 <div>
                   <h3 className="text-lg font-medium">Parâmetros Dinâmicos</h3>
                   <p className="mt-2 text-sm">
-                    Utilize parâmetros dinâmicos para personalizar suas mensagens. Os parâmetros são representados por {{"{{"}}1{{"}}"}}, {{"{{"}}2{{"}}"}}, etc., e podem incluir:
+                    Utilize parâmetros dinâmicos para personalizar suas mensagens. Os parâmetros são representados por {'{{'} 1 {'}}'}, {'{{'} 2 {'}}'}, etc., e podem incluir:
                   </p>
                   <ul className="mt-2 space-y-1 list-disc list-inside text-sm">
                     <li>Nome do destinatário</li>
@@ -813,24 +813,24 @@ export default function WhatsAppBusinessConfig() {
                     <div className="rounded-md border p-3">
                       <p className="font-medium text-sm text-green-800">Template de Utilidade - Confirmação de Agendamento</p>
                       <p className="mt-1 text-sm">
-                        Olá {{"{{"}}1{{"}}"}}, estamos confirmando sua aula de {{"{{"}}2{{"}}"}} agendada para {{"{{"}}3{{"}}"}}, com o professor {{"{{"}}4{{"}}"}}.
-                        Para reagendar ou cancelar, entre em contato pelo telefone {{"{{"}}5{{"}}"}}.
+                        Olá {'{{'} 1 {'}}'}, estamos confirmando sua aula de {'{{'} 2 {'}}'}  agendada para {'{{'} 3 {'}}'}, com o professor {'{{'} 4 {'}}'}.
+                        Para reagendar ou cancelar, entre em contato pelo telefone {'{{'} 5 {'}}'}.
                       </p>
                     </div>
                     
                     <div className="rounded-md border p-3">
                       <p className="font-medium text-sm text-blue-800">Template de Marketing - Promoção</p>
                       <p className="mt-1 text-sm">
-                        Olá {{"{{"}}1{{"}}"}}, temos uma oferta especial para você! Inscreva-se em um segundo curso e ganhe {{"{{"}}2{{"}}"}}% de desconto.
-                        Oferta válida até {{"{{"}}3{{"}}"}}.
+                        Olá {'{{'} 1 {'}}'}, temos uma oferta especial para você! Inscreva-se em um segundo curso e ganhe {'{{'} 2 {'}}'}% de desconto.
+                        Oferta válida até {'{{'} 3 {'}}'}.
                       </p>
                     </div>
                     
                     <div className="rounded-md border p-3">
                       <p className="font-medium text-sm text-purple-800">Template de Autenticação - Código</p>
                       <p className="mt-1 text-sm">
-                        Seu código de verificação para acessar a área do aluno da Escola de Música é {{"{{"}}1{{"}}"}}.
-                        Este código é válido por {{"{{"}}2{{"}}"}} minutos.
+                        Seu código de verificação para acessar a área do aluno da Escola de Música é {'{{'} 1 {'}}'}.
+                        Este código é válido por {'{{'} 2 {'}}'}  minutos.
                       </p>
                     </div>
                   </div>

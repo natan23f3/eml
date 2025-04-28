@@ -11,8 +11,10 @@ import { useAuthContext } from '@/providers/AuthProvider';
 import { useSchoolSettings } from '@/providers/SchoolSettingsProvider';
 import { 
   User, Bell, Shield, Building, Database, CreditCard, 
-  Mail, LogOut, Cloud, Save, Upload, PaintBucket
+  Mail, LogOut, Cloud, Save, Upload, PaintBucket,
+  MessageSquare, Send, MessageCircle
 } from 'lucide-react';
+import WhatsAppBusinessConfig from '@/components/settings/WhatsAppBusinessConfig';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Settings() {
@@ -444,6 +446,34 @@ export default function Settings() {
                     </div>
                   </div>
                   <Button variant="outline" size="sm">Configurar</Button>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 border rounded-md">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                      <MessageCircle className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-medium">WhatsApp Business API</h4>
+                      <p className="text-xs text-gray-500">Integração para mensagens automáticas</p>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      const whatsappTab = document.getElementById('whatsapp-tab');
+                      if (whatsappTab) {
+                        whatsappTab.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                  >
+                    Configurar
+                  </Button>
+                </div>
+                
+                <div id="whatsapp-tab" className="pt-4">
+                  <WhatsAppBusinessConfig />
                 </div>
                 
                 <div className="flex items-center justify-between p-4 border rounded-md">
