@@ -1,204 +1,114 @@
-import { useEffect, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { 
-  Users, DollarSign, BookOpen, BarChart3, UserPlus, Calendar, Banknote
-} from 'lucide-react';
-import { Layout } from '@/components/layout/Layout';
-import { StatCard } from '@/components/dashboard/StatCard';
-import { ChartCard } from '@/components/dashboard/ChartCard';
-import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
-import { ScheduleCard } from '@/components/dashboard/ScheduleCard';
-import { StudentTable } from '@/components/dashboard/StudentTable';
-import { QuickAction } from '@/components/dashboard/QuickAction';
-import { DashboardStats, RecentActivity, ScheduleItem, RecentStudent } from '@/types/schema';
+import MainLayout from '@/components/layout/MainLayout';
+import { Card } from '@/components/ui/card';
 
 export default function Dashboard() {
-  const [revenueTimeframe, setRevenueTimeframe] = useState<'Mensal' | 'Anual'>('Mensal');
-  
-  // Fetch dashboard stats
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['/api/dashboard/stats'],
-    staleTime: 300000, // 5 minutes
-  });
-
-  // Fetch recent activities
-  const { data: activities, isLoading: activitiesLoading } = useQuery({
-    queryKey: ['/api/dashboard/activities'],
-    staleTime: 60000, // 1 minute
-  });
-
-  // Fetch daily schedule
-  const { data: schedule, isLoading: scheduleLoading } = useQuery({
-    queryKey: ['/api/dashboard/schedule'],
-    staleTime: 60000, // 1 minute
-  });
-
-  // Fetch recent students
-  const { data: recentStudents, isLoading: studentsLoading } = useQuery({
-    queryKey: ['/api/dashboard/recent-students'],
-    staleTime: 60000, // 1 minute
-  });
-
-  // Sample data for revenue chart
-  const revenueData = [
-    { name: 'Jan', receita: 24500, despesa: 18000, lucro: 6500 },
-    { name: 'Fev', receita: 26700, despesa: 17800, lucro: 8900 },
-    { name: 'Mar', receita: 28900, despesa: 18900, lucro: 10000 },
-    { name: 'Abr', receita: 29200, despesa: 19200, lucro: 10000 },
-    { name: 'Mai', receita: 30500, despesa: 19800, lucro: 10700 },
-    { name: 'Jun', receita: 32450, despesa: 21000, lucro: 11450 },
+  // Estatísticas para o dashboard
+  const stats = [
+    { title: 'Alunos', icon: '👥', count: '154', color: 'bg-blue-500' },
+    { title: 'Professores', icon: '👨‍🏫', count: '12', color: 'bg-green-500' },
+    { title: 'Cursos', icon: '🎵', count: '23', color: 'bg-purple-500' },
+    { title: 'Pagamentos', icon: '💰', count: 'R$ 24.850', color: 'bg-yellow-500' }
   ];
 
-  // Sample data for students distribution
-  const instrumentData = [
-    { name: 'Violão', value: 35 },
-    { name: 'Piano', value: 25 },
-    { name: 'Bateria', value: 15 },
-    { name: 'Canto', value: 12 },
-    { name: 'Baixo', value: 8 },
-    { name: 'Outros', value: 5 },
+  // Módulos do sistema
+  const modules = [
+    { name: 'Alunos', description: 'Cadastro e gestão de alunos', path: '/alunos' },
+    { name: 'Professores', description: 'Equipe de professores', path: '/professores' },
+    { name: 'Cursos', description: 'Cursos e programas', path: '/cursos' },
+    { name: 'Aulas', description: 'Calendário e agendamentos', path: '/aulas' },
+    { name: 'Pagamentos', description: 'Controle financeiro', path: '/pagamentos' },
+    { name: 'Relatórios', description: 'Análises e estatísticas', path: '/relatorios' },
+    { name: 'Comunicações', description: 'Mensagens e avisos', path: '/comunicacoes' },
+    { name: 'Configurações', description: 'Preferências do sistema', path: '/configuracoes' }
   ];
 
-  // Chart legends
-  const revenueLegend = [
-    { color: '#3b82f6', label: 'Receitas' },
-    { color: '#ef4444', label: 'Despesas' },
-    { color: '#22c55e', label: 'Lucro' },
-  ];
-
-  const instrumentLegend = [
-    { color: '#3b82f6', label: 'Violão' },
-    { color: '#8b5cf6', label: 'Piano' },
-    { color: '#eab308', label: 'Bateria' },
-    { color: '#22c55e', label: 'Canto' },
-    { color: '#ef4444', label: 'Baixo' },
-    { color: '#f97316', label: 'Outros' },
+  // Atividades recentes (simuladas)
+  const activities = [
+    { id: 1, user: 'Maria Silva', action: 'matriculou-se no curso', target: 'Violão Avançado', time: 'há 2 horas' },
+    { id: 2, user: 'Prof. João Santos', action: 'cadastrou nova aula de', target: 'Piano', time: 'há 4 horas' },
+    { id: 3, user: 'Carlos Oliveira', action: 'efetuou pagamento de', target: 'R$ 350,00', time: 'há 1 dia' },
+    { id: 4, user: 'Fernanda Lima', action: 'cancelou aula de', target: 'Canto', time: 'há 1 dia' },
+    { id: 5, user: 'Admin', action: 'adicionou novo curso de', target: 'Bateria para Iniciantes', time: 'há 2 dias' }
   ];
 
   return (
-    <Layout>
-      {/* Dashboard Overview */}
-      <div className="mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {/* Stats Cards */}
-          <StatCard
-            title="Total de Alunos"
-            value={statsLoading ? '...' : stats?.studentCount || 0}
-            change={{ value: '12% desde o mês passado', isPositive: true }}
-            icon={<Users className="w-5 h-5" />}
-            iconBgColor="bg-primary-100"
-            iconTextColor="text-primary-700"
-          />
-          
-          <StatCard
-            title="Receita Mensal"
-            value={statsLoading ? '...' : `R$ ${stats?.monthlyRevenue?.toLocaleString('pt-BR') || 0}`}
-            change={{ value: '8% desde o mês passado', isPositive: true }}
-            icon={<DollarSign className="w-5 h-5" />}
-            iconBgColor="bg-green-100"
-            iconTextColor="text-green-700"
-          />
-          
-          <StatCard
-            title="Total de Aulas"
-            value={statsLoading ? '...' : stats?.classCount || 0}
-            change={{ value: '5% desde o mês passado', isPositive: true }}
-            icon={<BookOpen className="w-5 h-5" />}
-            iconBgColor="bg-purple-100"
-            iconTextColor="text-purple-700"
-          />
-          
-          <StatCard
-            title="Taxa de Conversão"
-            value={statsLoading ? '...' : `${stats?.conversionRate || 0}%`}
-            change={{ value: '3% desde o mês passado', isPositive: false }}
-            icon={<BarChart3 className="w-5 h-5" />}
-            iconBgColor="bg-blue-100"
-            iconTextColor="text-blue-700"
-          />
+    <MainLayout
+      title="Dashboard"
+      description="Visão geral do sistema de gestão para escolas de música."
+    >
+      {/* Estatísticas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {stats.map((stat, index) => (
+          <div key={index} className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className={`h-2 ${stat.color}`}></div>
+            <div className="p-5">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-lg font-medium">{stat.title}</p>
+                  <p className="text-3xl font-bold mt-2">{stat.count}</p>
+                </div>
+                <div className="text-3xl">{stat.icon}</div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Módulos do sistema */}
+        <div className="lg:col-span-2">
+          <Card className="shadow-sm">
+            <div className="p-6">
+              <h3 className="text-lg font-medium mb-4">Módulos do Sistema</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {modules.map((module, index) => (
+                  <div 
+                    key={index} 
+                    className="border border-gray-200 rounded-md p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                    onClick={() => window.location.href = module.path}
+                  >
+                    <h4 className="font-medium">{module.name}</h4>
+                    <p className="text-sm text-gray-500 mt-1">{module.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
         </div>
-        
-        {/* Chart Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ChartCard
-            title="Receitas vs Despesas"
-            chartType="bar"
-            data={revenueData}
-            timeframe={revenueTimeframe}
-            setTimeframe={setRevenueTimeframe}
-            legendItems={revenueLegend}
-          />
-          
-          <ChartCard
-            title="Distribuição de Alunos por Instrumento"
-            chartType="pie"
-            data={instrumentData}
-            colors={['#3b82f6', '#8b5cf6', '#eab308', '#22c55e', '#ef4444', '#f97316']}
-            legendItems={instrumentLegend}
-          />
+
+        {/* Atividades recentes */}
+        <div>
+          <Card className="shadow-sm">
+            <div className="p-6">
+              <h3 className="text-lg font-medium mb-4">Atividades Recentes</h3>
+              <div className="space-y-4">
+                {activities.map((activity) => (
+                  <div key={activity.id} className="border-b border-gray-100 pb-3 last:border-b-0 last:pb-0">
+                    <div className="flex items-start">
+                      <div className="bg-blue-100 text-blue-600 rounded-full p-2 mr-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
+                          strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" 
+                            d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm">
+                          <span className="font-medium">{activity.user}</span>{' '}
+                          {activity.action}{' '}
+                          <span className="font-medium">{activity.target}</span>
+                        </p>
+                        <span className="text-xs text-gray-500">{activity.time}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
-      
-      {/* Recent Activity & Schedule */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <ActivityFeed 
-          activities={activitiesLoading ? [] : (activities as RecentActivity[])} 
-          isLoading={activitiesLoading} 
-        />
-        
-        <ScheduleCard 
-          scheduleItems={scheduleLoading ? [] : (schedule as ScheduleItem[])}
-          isLoading={scheduleLoading}
-        />
-      </div>
-      
-      {/* Recent Students */}
-      <StudentTable 
-        students={studentsLoading ? [] : (recentStudents as RecentStudent[])}
-        isLoading={studentsLoading}
-      />
-      
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <QuickAction
-          title="Cadastrar Novo Aluno"
-          description="Adicione um novo aluno e configure suas aulas e pagamentos."
-          icon={<UserPlus className="w-6 h-6" />}
-          iconBgColor="bg-primary-100"
-          iconTextColor="text-primary-700"
-          buttonText="Iniciar Cadastro"
-          buttonBgColor="bg-primary-50"
-          buttonTextColor="text-primary-700"
-          buttonHoverBgColor="bg-primary-100"
-          href="/students/new"
-        />
-        
-        <QuickAction
-          title="Agendar Nova Aula"
-          description="Crie um novo agendamento para aulas individuais ou em grupo."
-          icon={<Calendar className="w-6 h-6" />}
-          iconBgColor="bg-purple-100"
-          iconTextColor="text-purple-700"
-          buttonText="Criar Agendamento"
-          buttonBgColor="bg-purple-50"
-          buttonTextColor="text-purple-700"
-          buttonHoverBgColor="bg-purple-100"
-          href="/classes/new"
-        />
-        
-        <QuickAction
-          title="Registrar Pagamento"
-          description="Registre um novo pagamento de mensalidade ou outros serviços."
-          icon={<Banknote className="w-6 h-6" />}
-          iconBgColor="bg-green-100"
-          iconTextColor="text-green-700"
-          buttonText="Registrar Pagamento"
-          buttonBgColor="bg-green-50"
-          buttonTextColor="text-green-700"
-          buttonHoverBgColor="bg-green-100"
-          href="/payments/new"
-        />
-      </div>
-    </Layout>
+    </MainLayout>
   );
 }
