@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
-import { useAuthContext } from '@/providers/AuthProvider';
+import { useAuth } from '@/hooks/useAuth';
 import { useSchoolSettings } from '@/providers/SchoolSettingsProvider';
 import { 
   User, Bell, Shield, Building, Database, CreditCard, 
@@ -18,7 +18,7 @@ import WhatsAppBusinessConfig from '@/components/settings/WhatsAppBusinessConfig
 import { useToast } from '@/hooks/use-toast';
 
 export default function Settings() {
-  const { user, signOut } = useAuthContext();
+  const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
   const { settings, updateSettings, saveSettings, isSaving } = useSchoolSettings();
 
@@ -356,25 +356,25 @@ export default function Settings() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor="email-events">Eventos</Label>
+                    <Label htmlFor="email-events">Eventos do calendário</Label>
                     <p className="text-sm text-muted-foreground">
-                      Receba lembretes sobre eventos próximos da escola
+                      Receba notificações sobre aulas e eventos
                     </p>
                   </div>
                   <Switch id="email-events" defaultChecked />
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor="email-updates">Atualizações do sistema</Label>
+                    <Label htmlFor="email-security">Alertas de segurança</Label>
                     <p className="text-sm text-muted-foreground">
-                      Receba notificações sobre novas funcionalidades
+                      Seja notificado sobre tentativas de login e alterações de senha
                     </p>
                   </div>
-                  <Switch id="email-updates" defaultChecked />
+                  <Switch id="email-security" defaultChecked />
                 </div>
               </div>
               
-              <div className="pt-4 border-t mt-6">
+              <div className="pt-6 border-t mt-6">
                 <h4 className="text-sm font-medium mb-2">Notificações no Sistema</h4>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -388,21 +388,45 @@ export default function Settings() {
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label htmlFor="push-mentions">Aulas do dia</Label>
+                      <Label htmlFor="push-mentions">Menções</Label>
                       <p className="text-sm text-muted-foreground">
-                        Receba lembretes sobre as aulas do dia
+                        Receba notificações quando for mencionado em comentários
                       </p>
                     </div>
                     <Switch id="push-mentions" defaultChecked />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label htmlFor="push-messages">Mensagens</Label>
+                      <Label htmlFor="push-deployed">Atualizações do sistema</Label>
                       <p className="text-sm text-muted-foreground">
-                        Receba notificações para novas mensagens
+                        Receba notificações sobre atualizações e novos recursos
                       </p>
                     </div>
-                    <Switch id="push-messages" defaultChecked />
+                    <Switch id="push-deployed" defaultChecked />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="pt-6 border-t mt-6">
+                <h4 className="text-sm font-medium mb-2">Alertas WhatsApp</h4>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="whatsapp-classes">Lembretes de aulas</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Receba lembretes de aulas próximas via WhatsApp
+                      </p>
+                    </div>
+                    <Switch id="whatsapp-classes" defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="whatsapp-payments">Lembretes de pagamento</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Receba lembretes de pagamentos pendentes via WhatsApp
+                      </p>
+                    </div>
+                    <Switch id="whatsapp-payments" defaultChecked />
                   </div>
                 </div>
               </div>

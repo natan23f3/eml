@@ -279,7 +279,7 @@ export default function WhatsAppMassCommunication() {
                     <span className="text-sm font-medium">Data Agendada:</span>
                     <p className="text-sm text-muted-foreground">
                       {form.getValues('scheduledDate') 
-                        ? new Date(form.getValues('scheduledDate')).toLocaleDateString('pt-BR', { 
+                        ? new Date(form.getValues('scheduledDate') as string).toLocaleDateString('pt-BR', { 
                             day: '2-digit', 
                             month: '2-digit', 
                             year: 'numeric',
