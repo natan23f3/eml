@@ -1,11 +1,8 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
-import { AuthProvider } from "./providers/NewAuthProvider";
 
-// Aplicação com autenticação
+// Aplicação sem autenticação
 createRoot(document.getElementById("root")!).render(
-  <AuthProvider>
-    <App />
-  </AuthProvider>
+  <App />
 );
