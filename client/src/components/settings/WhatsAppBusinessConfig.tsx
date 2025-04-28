@@ -231,16 +231,16 @@ export default function WhatsAppBusinessConfig() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-x-hidden">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="api-config">
-            <KeyRound className="h-4 w-4 mr-2" />
-            Configuração da API
+          <TabsTrigger value="api-config" className="text-xs sm:text-sm">
+            <KeyRound className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="truncate">Configuração da API</span>
           </TabsTrigger>
-          <TabsTrigger value="message-templates">
-            <SendHorizonal className="h-4 w-4 mr-2" />
-            Templates de Mensagem
+          <TabsTrigger value="message-templates" className="text-xs sm:text-sm">
+            <SendHorizonal className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="truncate">Templates de Mensagem</span>
           </TabsTrigger>
         </TabsList>
 
@@ -512,7 +512,7 @@ export default function WhatsAppBusinessConfig() {
 
             {/* Card de teste de envio */}
             <Card>
-              <CardHeader>
+              <CardHeader className="sm:pb-3">
                 <CardTitle>Teste de Envio</CardTitle>
                 <CardDescription>
                   Envie uma mensagem de teste para verificar a integração
@@ -522,16 +522,21 @@ export default function WhatsAppBusinessConfig() {
                 <div className="space-y-4">
                   <div>
                     <FormLabel htmlFor="test-phone">Número de Telefone para Teste</FormLabel>
-                    <div className="flex space-x-2 mt-1.5">
-                      <Input
-                        id="test-phone"
-                        placeholder="+5511987654321"
-                        value={testPhoneNumber}
-                        onChange={(e) => setTestPhoneNumber(e.target.value)}
-                      />
+                    <div className="flex flex-col sm:flex-row gap-2 mt-1.5">
+                      <div className="relative flex-grow">
+                        <Smartphone className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="test-phone"
+                          placeholder="+5511987654321"
+                          value={testPhoneNumber}
+                          onChange={(e) => setTestPhoneNumber(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
                       <Button
                         onClick={sendTestMessage}
                         disabled={isTestingSend || !testPhoneNumber}
+                        className="sm:w-auto w-full"
                       >
                         {isTestingSend ? (
                           <>
@@ -541,21 +546,21 @@ export default function WhatsAppBusinessConfig() {
                         ) : (
                           <>
                             <SendHorizonal className="mr-2 h-4 w-4" />
-                            Enviar
+                            Enviar Teste
                           </>
                         )}
                       </Button>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Digite um número de telefone com código do país para receber a mensagem de teste
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+                      Digite um número com código do país (exemplo: +5511987654321)
                     </p>
                   </div>
 
-                  <Alert>
-                    <BrainCircuit className="h-4 w-4" />
+                  <Alert className="text-xs sm:text-sm">
+                    <BrainCircuit className="h-4 w-4 flex-shrink-0" />
                     <AlertTitle>Observação importante</AlertTitle>
                     <AlertDescription>
-                      Apenas números verificados podem receber mensagens durante o período de teste. Para números não verificados, será necessário usar templates aprovados.
+                      Apenas números verificados podem receber mensagens durante o período de teste. Para outros números, use templates aprovados.
                     </AlertDescription>
                   </Alert>
                 </div>
@@ -707,13 +712,13 @@ export default function WhatsAppBusinessConfig() {
                         <FormLabel>Conteúdo do Template</FormLabel>
                         <FormControl>
                           <Textarea
-                            placeholder="Digite o conteúdo do template. Exemplo: Olá {{1}}, bem-vindo à nossa escola de música! Sua primeira aula de {{2}} está agendada para {{3}}."
-                            className="min-h-32 font-mono"
+                            placeholder={"Digite o conteúdo do template. Exemplo: Olá {{1}}, bem-vindo à nossa escola de música! Sua primeira aula de {{2}} está agendada para {{3}}."}
+                            className="min-h-[128px] font-mono"
                             {...field}
                           />
                         </FormControl>
                         <FormDescription>
-                          Use {{1}}, {{2}}, etc. para parâmetros dinâmicos que serão substituídos ao enviar a mensagem.
+                          Use {'{{'} 1 {'}}'}, {'{{'} 2 {'}}'}, etc. para parâmetros dinâmicos que serão substituídos ao enviar a mensagem.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
