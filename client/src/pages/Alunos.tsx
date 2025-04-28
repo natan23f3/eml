@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   Dialog, 
   DialogContent, 
@@ -39,6 +40,12 @@ const studentSchema = z.object({
   phone: z.string().min(10, { message: 'Forneça um telefone válido' }),
   course: z.string().min(1, { message: 'Selecione um curso' }),
   status: z.string().min(1, { message: 'Selecione um status' }),
+  address: z.string().optional(),
+  document: z.string().optional(),
+  monthlyFee: z.string().optional(),
+  paymentDay: z.string().optional(),
+  paymentMethod: z.string().optional(),
+  notes: z.string().optional(),
 });
 
 type StudentFormValues = z.infer<typeof studentSchema>;
@@ -52,10 +59,17 @@ type Student = {
   course: string;
   status: 'active' | 'inactive' | 'pending';
   registrationDate: string;
+  address?: string;
+  document?: string;
+  monthlyFee?: string;
+  paymentDay?: string;
+  paymentMethod?: string;
+  notes?: string;
 };
 
 export default function Alunos() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
@@ -217,12 +231,19 @@ export default function Alunos() {
     form.reset();
   };
   
-  // Filtrar alunos com base no termo de pesquisa
-  const filteredStudents = students.filter(student =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.course.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filtrar alunos com base no termo de pesquisa e status
+  const filteredStudents = students.filter(student => {
+    // Filtro por termo de busca
+    const matchesSearchTerm = 
+      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.course.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Filtro por status
+    const matchesStatus = statusFilter && statusFilter !== 'all' ? student.status === statusFilter : true;
+    
+    return matchesSearchTerm && matchesStatus;
+  });
   
   // Função para obter a cor de status
   const getStatusColor = (status: Student['status']) => {
@@ -258,20 +279,34 @@ export default function Alunos() {
       description="Gerenciamento de alunos da escola de música."
     >
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="flex-1 relative max-w-sm">
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar alunos..."
-            className="pl-10"
-          />
-          <div className="absolute left-3 top-2.5 text-gray-400">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
-              strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" 
-                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-            </svg>
+        <div className="flex flex-wrap gap-4 items-center">
+          <div className="relative w-full sm:w-auto sm:min-w-[240px]">
+            <Input
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Buscar alunos..."
+              className="pl-10"
+            />
+            <div className="absolute left-3 top-2.5 text-gray-400">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
+                strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" 
+                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+            </div>
           </div>
+          
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="active">Ativos</SelectItem>
+              <SelectItem value="inactive">Inativos</SelectItem>
+              <SelectItem value="pending">Pendentes</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -391,6 +426,111 @@ export default function Alunos() {
                     )}
                   />
                 </div>
+                
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Endereço</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Endereço completo" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="document"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CPF</FormLabel>
+                      <FormControl>
+                        <Input placeholder="000.000.000-00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="border-t pt-4 mt-6">
+                  <h3 className="text-lg font-medium mb-4">Informações Financeiras</h3>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="monthlyFee"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Mensalidade (R$)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="0,00" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="paymentDay"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Dia de Pagamento</FormLabel>
+                          <FormControl>
+                            <Input type="number" min="1" max="31" placeholder="10" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="paymentMethod"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Forma de Pagamento</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecione" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="pix">Pix</SelectItem>
+                              <SelectItem value="creditCard">Cartão de Crédito</SelectItem>
+                              <SelectItem value="bankSlip">Boleto Bancário</SelectItem>
+                              <SelectItem value="bankTransfer">Transferência</SelectItem>
+                              <SelectItem value="cash">Dinheiro</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Observações</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Informações adicionais sobre o aluno..." 
+                          className="min-h-[80px]"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 
                 <DialogFooter className="mt-6">
                   <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
