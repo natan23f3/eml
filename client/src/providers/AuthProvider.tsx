@@ -80,19 +80,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Simular tempo de resposta da API
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const foundUser = mockCredentials.find(
-        cred => cred.email === email && cred.password === password
-      );
-      
-      if (foundUser) {
-        setUser(foundUser.user);
-        // Salvar no localStorage
-        localStorage.setItem('musicschool_user', JSON.stringify(foundUser.user));
-        return true;
-      } else {
-        throw new Error('Credenciais inválidas');
+      // Verificar credenciais hardcoded para desenvolvimento
+      // Isso será substituído pela integração com o Firebase quando tivermos as credenciais
+      if ((email === 'admin@musicschool.com' && password === 'admin123') ||
+          (email === 'professor@musicschool.com' && password === 'professor123')) {
+        
+        const foundUser = mockCredentials.find(
+          cred => cred.email === email && cred.password === password
+        );
+        
+        if (foundUser) {
+          console.log('Usuário encontrado:', foundUser.user);
+          setUser(foundUser.user);
+          // Salvar no localStorage
+          localStorage.setItem('musicschool_user', JSON.stringify(foundUser.user));
+          return true;
+        }
       }
+      
+      // Se chegou aqui, credenciais são inválidas
+      console.error('Login falhou: credenciais inválidas');
+      throw new Error('Credenciais inválidas');
     } catch (err) {
+      console.error('Erro no login:', err);
       setError(err as Error);
       return false;
     } finally {

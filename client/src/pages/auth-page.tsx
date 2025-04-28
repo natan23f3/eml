@@ -24,15 +24,18 @@ export default function AuthPage() {
     setIsSubmitting(true);
     
     try {
+      console.log('Tentando login com:', email, password);
       const success = await login(email, password);
       if (success) {
+        console.log('Login bem-sucedido, redirecionando...');
         setLocation('/');
       } else {
-        setError('Credenciais inválidas. Tente admin@musicschool.com / admin123');
+        console.error('Login falhou');
+        setError('Credenciais inválidas. Use admin@musicschool.com / admin123');
       }
     } catch (err) {
-      setError('Ocorreu um erro durante o login.');
-      console.error(err);
+      console.error('Erro durante o login:', err);
+      setError('Ocorreu um erro durante o login. Tente admin@musicschool.com / admin123');
     } finally {
       setIsSubmitting(false);
     }
@@ -122,10 +125,22 @@ export default function AuthPage() {
             </button>
           </div>
           
-          <div className="text-center text-sm text-gray-500 mt-4">
-            <p>Credenciais de demonstração:</p>
-            <p className="mt-1"><strong>Email:</strong> admin@musicschool.com</p>
-            <p><strong>Senha:</strong> admin123</p>
+          <div className="text-center text-sm mt-4">
+            <div className="p-3 bg-blue-50 border border-blue-100 rounded-md">
+              <p className="font-medium text-blue-700 mb-1">Credenciais de demonstração:</p>
+              <div className="grid grid-cols-2 gap-2 text-gray-700">
+                <div className="bg-white p-2 rounded border border-gray-200">
+                  <p className="font-bold">Administrador</p>
+                  <p className="mt-1"><strong>Email:</strong> admin@musicschool.com</p>
+                  <p><strong>Senha:</strong> admin123</p>
+                </div>
+                <div className="bg-white p-2 rounded border border-gray-200">
+                  <p className="font-bold">Professor</p>
+                  <p className="mt-1"><strong>Email:</strong> professor@musicschool.com</p>
+                  <p><strong>Senha:</strong> professor123</p>
+                </div>
+              </div>
+            </div>
           </div>
         </form>
       </div>
