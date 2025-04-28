@@ -246,6 +246,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Student Interactions API Routes
+  
+  // Class reminders
+  app.post("/api/student-interactions/class-reminder", sendClassReminder);
+  
+  // Payment reminders
+  app.post("/api/student-interactions/payment-reminder", sendPaymentReminder);
+  
+  // Automatic reminders config
+  app.post("/api/student-interactions/auto-reminders", scheduleAutomaticReminders);
+  
+  // Message templates
+  app.get("/api/student-interactions/message-templates", getMessageTemplates);
+  app.post("/api/student-interactions/message-templates", saveMessageTemplate);
+
   // Create HTTP server
   const httpServer = createServer(app);
 

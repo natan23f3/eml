@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Layout } from '@/components/layout/Layout';
+import MainLayout from '@/components/layout/MainLayout';
 import { CommunicationList } from '@/components/communications/CommunicationList';
 import { CommunicationForm } from '@/components/communications/CommunicationForm';
+import MessageTemplatesEditor from '@/components/communications/MessageTemplatesEditor';
+import WhatsAppReminder from '@/components/communications/WhatsAppReminder';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Mail, MessageSquare, PhoneCall } from 'lucide-react';
+import { Plus, Mail, MessageSquare, PhoneCall, FileEdit, BellRing } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 
 export default function Communications() {

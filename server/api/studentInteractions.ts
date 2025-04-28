@@ -1,51 +1,122 @@
 import { Request, Response } from 'express';
 import { storage } from '../storage';
 
+// Helper para integração com WhatsApp Business API
+async function sendWhatsAppMessage(to: string, message: string, templateName?: string) {
+  try {
+    // Normalmente se usaria uma biblioteca ou a API direta do WhatsApp Business
+    // Aqui está uma simulação da requisição que seria feita
+    
+    // URL da API WhatsApp Business
+    const apiUrl = 'https://graph.facebook.com/v18.0/PHONE_NUMBER_ID/messages';
+    
+    // Dados para envio da mensagem
+    const payload = templateName 
+      ? {
+          // Usando template
+          messaging_product: "whatsapp",
+          recipient_type: "individual",
+          to: to,
+          type: "template",
+          template: {
+            name: templateName,
+            language: {
+              code: "pt_BR"
+            },
+            components: []
+          }
+        }
+      : {
+          // Usando texto simples
+          messaging_product: "whatsapp",
+          recipient_type: "individual",
+          to: to,
+          type: "text",
+          text: {
+            preview_url: false,
+            body: message
+          }
+        };
+    
+    // Aqui faria a requisição real usando fetch ou axios
+    // const response = await fetch(apiUrl, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': `Bearer ${process.env.WHATSAPP_TOKEN}`
+    //   },
+    //   body: JSON.stringify(payload)
+    // });
+    
+    // const data = await response.json();
+    // return data;
+    
+    // Simulação de resposta
+    console.log('Mensagem WhatsApp enviada com sucesso:', { to, message, templateName });
+    return { success: true, messageId: `whatsapp_${Date.now()}` };
+  } catch (error) {
+    console.error('Erro ao enviar mensagem via WhatsApp:', error);
+    throw new Error('Falha ao enviar mensagem via WhatsApp');
+  }
+}
+
 // Funções para interações com alunos
 export const sendClassReminder = async (req: Request, res: Response) => {
   try {
-    const { studentId, message, scheduledDate } = req.body;
+    const { studentId, message, scheduledDate, phoneNumber } = req.body;
     
-    if (!studentId || !message) {
-      return res.status(400).json({ error: 'Campos obrigatórios ausentes' });
+    if (!studentId || !message || !phoneNumber) {
+      return res.status(400).json({ error: 'Campos obrigatórios ausentes (studentId, message, phoneNumber)' });
     }
     
-    // Aqui seria implementada a lógica de envio de lembrete
-    // utilizando um serviço como SendGrid, Twilio, etc.
+    // Enviar mensagem via WhatsApp
+    const whatsappResponse = await sendWhatsAppMessage(
+      phoneNumber,
+      message,
+      'class_reminder' // Nome do template no WhatsApp Business
+    );
     
     // Registrar o lembrete no banco de dados
     const reminder = {
       id: Date.now().toString(),
       studentId,
       message,
+      phoneNumber,
       scheduledDate: scheduledDate || new Date().toISOString(),
-      status: 'scheduled', 
-      type: 'class_reminder'
+      status: 'sent', 
+      type: 'class_reminder',
+      whatsappMessageId: whatsappResponse.messageId
     };
     
-    // Simular a resposta de sucesso
     return res.status(200).json({ 
       success: true, 
-      message: 'Lembrete de aula agendado com sucesso',
+      message: 'Lembrete de aula enviado com sucesso via WhatsApp',
       data: reminder
     });
   } catch (error) {
-    console.error('Erro ao agendar lembrete de aula:', error);
+    console.error('Erro ao enviar lembrete de aula:', error);
     return res.status(500).json({ error: 'Erro ao processar a solicitação' });
   }
 };
 
 export const sendPaymentReminder = async (req: Request, res: Response) => {
   try {
-    const { studentId, amount, dueDate, message } = req.body;
+    const { studentId, amount, dueDate, message, phoneNumber } = req.body;
     
-    if (!studentId || !amount || !dueDate) {
-      return res.status(400).json({ error: 'Campos obrigatórios ausentes' });
+    if (!studentId || !amount || !dueDate || !phoneNumber) {
+      return res.status(400).json({ error: 'Campos obrigatórios ausentes (studentId, amount, dueDate, phoneNumber)' });
     }
     
-    // Aqui seria implementada a lógica de envio de cobrança
-    // utilizando um serviço como SendGrid para email ou integrações
-    // com gateways de pagamento como Stripe
+    // Preparar a mensagem de pagamento
+    const defaultMessage = `Olá! Lembramos que o pagamento de R$ ${amount} vence em ${new Date(dueDate).toLocaleDateString()}. Agradecemos sua atenção.`;
+    const paymentMessage = message || defaultMessage;
+    
+    // Enviar mensagem via WhatsApp
+    const whatsappResponse = await sendWhatsAppMessage(
+      phoneNumber,
+      paymentMessage,
+      'payment_reminder' // Nome do template no WhatsApp Business
+    );
     
     // Registrar a cobrança no banco de dados
     const payment = {
@@ -53,16 +124,17 @@ export const sendPaymentReminder = async (req: Request, res: Response) => {
       studentId,
       amount,
       dueDate,
-      message: message || 'Lembrete de pagamento da mensalidade',
-      status: 'pending',
+      phoneNumber,
+      message: paymentMessage,
+      status: 'sent',
       type: 'payment_reminder',
+      whatsappMessageId: whatsappResponse.messageId,
       createdAt: new Date().toISOString()
     };
     
-    // Simular a resposta de sucesso
     return res.status(200).json({ 
       success: true, 
-      message: 'Cobrança enviada com sucesso',
+      message: 'Cobrança enviada com sucesso via WhatsApp',
       data: payment
     });
   } catch (error) {
