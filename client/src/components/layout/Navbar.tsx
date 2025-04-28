@@ -20,20 +20,22 @@ export default function Navbar() {
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <h1 className="text-xl font-bold text-blue-600">MusicSchool Pro</h1>
+              <Link href="/">
+                <span className="cursor-pointer text-xl font-bold text-blue-600">MusicSchool Pro</span>
+              </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               {navItems.map((item) => (
                 <Link key={item.path} href={item.path}>
-                  <a
+                  <span
                     className={`${
                       location === item.path
                         ? 'border-blue-500 text-gray-900'
                         : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                    } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium h-16`}
+                    } cursor-pointer inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium h-16`}
                   >
                     {item.name}
-                  </a>
+                  </span>
                 </Link>
               ))}
             </div>

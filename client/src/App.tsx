@@ -8,6 +8,9 @@ import { queryClient } from '@/lib/queryClient';
 import Dashboard from '@/pages/Dashboard';
 import Alunos from '@/pages/Alunos';
 import Professores from '@/pages/Professores';
+import Cursos from '@/pages/Cursos';
+import Aulas from '@/pages/Aulas';
+import Pagamentos from '@/pages/Pagamentos';
 
 // Aplicação principal com roteamento
 function App() {
@@ -20,6 +23,9 @@ function App() {
           <Route path="/" component={Dashboard} />
           <Route path="/alunos" component={Alunos} />
           <Route path="/professores" component={Professores} />
+          <Route path="/cursos" component={Cursos} />
+          <Route path="/aulas" component={Aulas} />
+          <Route path="/pagamentos" component={Pagamentos} />
           <Route component={NotFound} />
         </Switch>
       </div>
