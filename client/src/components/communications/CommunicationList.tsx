@@ -1,19 +1,24 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Mail, MessageSquare, PhoneCall, Search, Info } from "lucide-react";
+import { Mail, MessageSquare, PhoneCall, Search, Info, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Communication } from "@/types/schema";
 
 interface CommunicationListProps {
-  communications: Communication[];
+  communications: Communication[] | any[];
   isLoading?: boolean;
+  showFilters?: boolean;
 }
 
-export function CommunicationList({ communications, isLoading = false }: CommunicationListProps) {
+export function CommunicationList({ communications = [], isLoading = false, showFilters = false }: CommunicationListProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
 
   // Format date
   const formatDate = (dateString: string): string => {
@@ -76,17 +81,27 @@ export function CommunicationList({ communications, isLoading = false }: Communi
     }
   };
 
-  // Filter communications based on search term
-  const filteredCommunications = communications.filter(comm => 
-    (comm.subject && comm.subject.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    comm.content.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter communications based on search term, status, and type
+  const filteredCommunications = communications.filter(comm => {
+    // Text search filter
+    const matchesSearch = 
+      (comm.subject && comm.subject.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (comm.content && comm.content.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    // Status filter
+    const matchesStatus = statusFilter === 'all' || (comm.status === statusFilter);
+
+    // Type filter
+    const matchesType = typeFilter === 'all' || (comm.type === typeFilter);
+
+    return matchesSearch && matchesStatus && matchesType;
+  });
 
   return (
     <Card>
       <CardHeader className="pb-3">
         <CardTitle>Histórico de Comunicações</CardTitle>
-        <div className="mt-4">
+        <div className="mt-4 space-y-4">
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             <Input
@@ -96,6 +111,55 @@ export function CommunicationList({ communications, isLoading = false }: Communi
               className="pl-10"
             />
           </div>
+          
+          {showFilters && (
+            <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Filter className="h-4 w-4" />
+                <span>Filtros:</span>
+              </div>
+              
+              <div className="grid grid-cols-2 sm:flex gap-2">
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="sms">SMS</SelectItem>
+                    <SelectItem value="call">Ligações</SelectItem>
+                    <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="sent">Enviados</SelectItem>
+                    <SelectItem value="pending">Pendentes</SelectItem>
+                    <SelectItem value="failed">Falhou</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setTypeFilter('all');
+                    setStatusFilter('all');
+                    setSearchTerm('');
+                  }}
+                  className="text-xs"
+                >
+                  Limpar filtros
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </CardHeader>
       <CardContent>
