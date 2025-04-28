@@ -40,7 +40,7 @@ export default function Settings() {
 
   const handleLogout = async () => {
     try {
-      await signOut();
+      await logoutMutation.mutateAsync();
       toast({
         title: "Sessão encerrada",
         description: "Você foi desconectado com sucesso.",
@@ -81,7 +81,7 @@ export default function Settings() {
               <CardContent className="space-y-4">
                 <div className="flex flex-col sm:flex-row gap-4 items-center mb-6">
                   <div className="w-24 h-24 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 text-2xl font-bold">
-                    {user?.displayName ? user.displayName.charAt(0) : 'U'}
+                    {user?.displayName ? user.displayName.charAt(0) : (user?.email ? user.email.charAt(0).toUpperCase() : 'U')}
                   </div>
                   <div className="flex flex-col">
                     <h3 className="text-lg font-medium">{user?.displayName || 'Usuário'}</h3>

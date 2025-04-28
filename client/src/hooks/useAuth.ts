@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { User as FirebaseUser, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth } from '@/lib/firebaseAuth';
+import { logoutUser } from '@/lib/firebaseAuth';
+import { useMutation } from '@tanstack/react-query';
 
 export function useAuth() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
@@ -22,6 +24,15 @@ export function useAuth() {
 
     return () => unsubscribe();
   }, []);
+  
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      return await logoutUser();
+    },
+    onSuccess: () => {
+      setUser(null);
+    }
+  });
 
-  return { user, loading, error };
+  return { user, loading, error, logoutMutation };
 }
