@@ -3,6 +3,13 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertStudentSchema, insertTeacherSchema, insertCourseSchema, insertClassSchema, 
   insertEnrollmentSchema, insertPaymentSchema, insertExpenseSchema, insertCommunicationSchema } from "@shared/schema";
+import { 
+  sendClassReminder, 
+  sendPaymentReminder, 
+  scheduleAutomaticReminders, 
+  getMessageTemplates, 
+  saveMessageTemplate 
+} from "./api/studentInteractions";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Students API routes
