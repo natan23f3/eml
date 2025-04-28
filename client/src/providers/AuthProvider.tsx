@@ -81,7 +81,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Verificar credenciais hardcoded para desenvolvimento
-      // Isso será substituído pela integração com o Firebase quando tivermos as credenciais
       if ((email === 'admin@musicschool.com' && password === 'admin123') ||
           (email === 'professor@musicschool.com' && password === 'professor123')) {
         
