@@ -7,9 +7,17 @@ import {
   sendClassReminder, 
   sendPaymentReminder, 
   scheduleAutomaticReminders, 
-  getMessageTemplates, 
-  saveMessageTemplate 
+  getMessageTemplates as getInteractionTemplates, 
+  saveMessageTemplate as saveInteractionTemplate 
 } from "./api/studentInteractions";
+import {
+  saveWhatsappConfig,
+  getWhatsappConfig,
+  testWhatsappConnection,
+  getMessageTemplates,
+  saveMessageTemplate,
+  sendTestMessage
+} from "./api/whatsappConfig";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Students API routes
@@ -258,8 +266,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/student-interactions/auto-reminders", scheduleAutomaticReminders);
   
   // Message templates
-  app.get("/api/student-interactions/message-templates", getMessageTemplates);
-  app.post("/api/student-interactions/message-templates", saveMessageTemplate);
+  app.get("/api/student-interactions/message-templates", getInteractionTemplates);
+  app.post("/api/student-interactions/message-templates", saveInteractionTemplate);
+  
+  // WhatsApp Business API Routes
+  app.get("/api/whatsapp/config", getWhatsappConfig);
+  app.post("/api/whatsapp/config", saveWhatsappConfig);
+  app.post("/api/whatsapp/test-connection", testWhatsappConnection);
+  app.post("/api/whatsapp/send-test", sendTestMessage);
+  app.get("/api/whatsapp/templates", getMessageTemplates);
+  app.post("/api/whatsapp/templates", saveMessageTemplate);
 
   // Create HTTP server
   const httpServer = createServer(app);

@@ -1,14 +1,20 @@
 import { Request, Response } from 'express';
 import { storage } from '../storage';
+import { getWhatsappConfigForInternal } from './whatsappConfig';
 
 // Helper para integração com WhatsApp Business API
 async function sendWhatsAppMessage(to: string, message: string, templateName?: string) {
   try {
-    // Normalmente se usaria uma biblioteca ou a API direta do WhatsApp Business
-    // Aqui está uma simulação da requisição que seria feita
+    // Obtém as configurações salvas pelo usuário
+    const config = getWhatsappConfigForInternal();
     
-    // URL da API WhatsApp Business
-    const apiUrl = 'https://graph.facebook.com/v18.0/PHONE_NUMBER_ID/messages';
+    if (!config.isEnabled || !config.whatsappApiToken || !config.phoneNumberId) {
+      console.error('API do WhatsApp não configurada ou desabilitada');
+      throw new Error('Configurações do WhatsApp Business incompletas ou API desabilitada');
+    }
+    
+    // URL da API WhatsApp Business com os valores das configurações do usuário
+    const apiUrl = `https://graph.facebook.com/${config.apiVersion}/${config.phoneNumberId}/messages`;
     
     // Dados para envio da mensagem
     const payload = templateName 
@@ -43,7 +49,7 @@ async function sendWhatsAppMessage(to: string, message: string, templateName?: s
     //   method: 'POST',
     //   headers: {
     //     'Content-Type': 'application/json',
-    //     'Authorization': `Bearer ${process.env.WHATSAPP_TOKEN}`
+    //     'Authorization': `Bearer ${config.whatsappApiToken}`
     //   },
     //   body: JSON.stringify(payload)
     // });
@@ -52,7 +58,7 @@ async function sendWhatsAppMessage(to: string, message: string, templateName?: s
     // return data;
     
     // Simulação de resposta
-    console.log('Mensagem WhatsApp enviada com sucesso:', { to, message, templateName });
+    console.log('Mensagem WhatsApp enviada com sucesso:', { to, message, templateName, phoneNumberId: config.phoneNumberId });
     return { success: true, messageId: `whatsapp_${Date.now()}` };
   } catch (error) {
     console.error('Erro ao enviar mensagem via WhatsApp:', error);
