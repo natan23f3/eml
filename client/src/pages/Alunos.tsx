@@ -1,9 +1,47 @@
 import { useState } from 'react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogFooter,
+  DialogTrigger
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+
+// Esquema de validação para o formulário
+const studentSchema = z.object({
+  name: z.string().min(3, { message: 'O nome deve ter pelo menos 3 caracteres' }),
+  email: z.string().email({ message: 'Forneça um e-mail válido' }),
+  phone: z.string().min(10, { message: 'Forneça um telefone válido' }),
+  course: z.string().min(1, { message: 'Selecione um curso' }),
+  status: z.string().min(1, { message: 'Selecione um status' }),
+});
+
+type StudentFormValues = z.infer<typeof studentSchema>;
 
 // Tipo para aluno
 type Student = {
@@ -18,9 +56,13 @@ type Student = {
 
 export default function Alunos() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
+  const { toast } = useToast();
   
   // Dados de exemplo
-  const students: Student[] = [
+  const [students, setStudents] = useState<Student[]>([
     {
       id: '1',
       name: 'Maria Silva',
@@ -66,7 +108,114 @@ export default function Alunos() {
       status: 'pending',
       registrationDate: '2023-06-25'
     }
+  ]);
+  
+  // Lista de cursos disponíveis
+  const courses = [
+    'Violão',
+    'Piano',
+    'Canto',
+    'Bateria',
+    'Violino',
+    'Guitarra',
+    'Flauta',
+    'Saxofone',
+    'Contrabaixo',
+    'Teclado'
   ];
+
+  // Configuração do formulário
+  const form = useForm<StudentFormValues>({
+    resolver: zodResolver(studentSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      phone: '',
+      course: '',
+      status: 'active',
+    },
+  });
+
+  // Função para editar aluno
+  const handleEditStudent = (student: Student) => {
+    setEditingStudentId(student.id);
+    setIsEditMode(true);
+    
+    form.reset({
+      name: student.name,
+      email: student.email,
+      phone: student.phone,
+      course: student.course,
+      status: student.status,
+    });
+    
+    setIsDialogOpen(true);
+  };
+  
+  // Função para excluir aluno
+  const handleDeleteStudent = (id: string) => {
+    if (confirm('Tem certeza que deseja excluir este aluno?')) {
+      const studentToDelete = students.find(s => s.id === id);
+      setStudents(students.filter(student => student.id !== id));
+      
+      toast({
+        title: 'Aluno excluído',
+        description: `O aluno ${studentToDelete?.name} foi removido com sucesso.`,
+        variant: 'destructive',
+      });
+    }
+  };
+  
+  // Função para salvar um novo aluno ou atualizar um existente
+  const onSubmit = (values: StudentFormValues) => {
+    if (isEditMode && editingStudentId) {
+      // Atualizar aluno existente
+      const updatedStudents = students.map(student => {
+        if (student.id === editingStudentId) {
+          return {
+            ...student,
+            name: values.name,
+            email: values.email,
+            phone: values.phone,
+            course: values.course,
+            status: values.status as 'active' | 'inactive' | 'pending',
+          };
+        }
+        return student;
+      });
+      
+      setStudents(updatedStudents);
+      
+      toast({
+        title: 'Aluno atualizado',
+        description: `As informações de ${values.name} foram atualizadas com sucesso.`,
+      });
+    } else {
+      // Criar novo aluno
+      const newStudent: Student = {
+        id: (students.length + 1).toString(),
+        name: values.name,
+        email: values.email,
+        phone: values.phone,
+        course: values.course,
+        status: values.status as 'active' | 'inactive' | 'pending',
+        registrationDate: new Date().toISOString().split('T')[0],
+      };
+      
+      setStudents([...students, newStudent]);
+      
+      toast({
+        title: 'Aluno adicionado',
+        description: `${values.name} foi adicionado com sucesso.`,
+      });
+    }
+    
+    // Fechar diálogo e limpar formulário
+    setIsDialogOpen(false);
+    setIsEditMode(false);
+    setEditingStudentId(null);
+    form.reset();
+  };
   
   // Filtrar alunos com base no termo de pesquisa
   const filteredStudents = students.filter(student =>
@@ -125,13 +274,136 @@ export default function Alunos() {
           </div>
         </div>
         
-        <Button>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
-            strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          Novo Aluno
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => {
+              setIsEditMode(false);
+              form.reset({
+                name: '',
+                email: '',
+                phone: '',
+                course: '',
+                status: 'active',
+              });
+            }}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
+                strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Novo Aluno
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>{isEditMode ? 'Editar Aluno' : 'Adicionar Novo Aluno'}</DialogTitle>
+            </DialogHeader>
+            
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nome completo" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="email@exemplo.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Telefone</FormLabel>
+                        <FormControl>
+                          <Input placeholder="(00) 00000-0000" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="course"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Curso</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione um curso" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {courses.map((course) => (
+                              <SelectItem key={course} value={course}>{course}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione um status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="active">Ativo</SelectItem>
+                            <SelectItem value="inactive">Inativo</SelectItem>
+                            <SelectItem value="pending">Pendente</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <DialogFooter className="mt-6">
+                  <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit">
+                    {isEditMode ? 'Salvar Alterações' : 'Adicionar Aluno'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
       
       <Card>
@@ -170,14 +442,22 @@ export default function Alunos() {
                     <TableCell>{new Date(student.registrationDate).toLocaleDateString('pt-BR')}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleEditStudent(student)}
+                        >
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
                             strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                             <path strokeLinecap="round" strokeLinejoin="round" 
                               d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                           </svg>
                         </Button>
-                        <Button variant="destructive" size="sm">
+                        <Button 
+                          variant="destructive" 
+                          size="sm"
+                          onClick={() => handleDeleteStudent(student.id)}
+                        >
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
                             strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                             <path strokeLinecap="round" strokeLinejoin="round" 
