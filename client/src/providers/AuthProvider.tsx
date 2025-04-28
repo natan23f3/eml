@@ -1,17 +1,16 @@
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'teacher' | 'staff';
-  avatar?: string;
-}
+import { 
+  login as authLogin, 
+  getUserFromStorage, 
+  saveUserToStorage, 
+  removeUserFromStorage,
+  User
+} from '@/lib/auth';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  error: Error | null;
+  error: string | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -32,92 +31,35 @@ const AuthContext = createContext<AuthContextType>(defaultValue);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
   // Verificar no localStorage se há usuário salvo
   useEffect(() => {
-    const savedUser = localStorage.getItem('musicschool_user');
+    const savedUser = getUserFromStorage();
     if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (err) {
-        console.error('Erro ao carregar usuário do localStorage:', err);
-        localStorage.removeItem('musicschool_user');
-      }
+      setUser(savedUser);
     }
   }, []);
 
-  // Credenciais mock para desenvolvimento
-  const mockCredentials = [
-    { 
-      email: 'admin@musicschool.com',
-      password: 'admin123',
-      user: {
-        id: '1',
-        name: 'Administrador',
-        email: 'admin@musicschool.com',
-        role: 'admin' as const
-      }
-    },
-    { 
-      email: 'professor@musicschool.com',
-      password: 'professor123',
-      user: {
-        id: '2',
-        name: 'Professor Demo',
-        email: 'professor@musicschool.com',
-        role: 'teacher' as const
-      }
-    }
-  ];
-
-  // Simula login
+  // Função de login
   const login = async (email: string, password: string): Promise<boolean> => {
     setLoading(true);
     setError(null);
     
-    console.log('Iniciando login para:', email);
-    console.log('Credenciais esperadas: admin@musicschool.com / admin123');
-    console.log('Comparação direta:', email === 'admin@musicschool.com', password === 'admin123');
-    
     try {
-      // Simular tempo de resposta da API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const authenticatedUser = await authLogin(email, password);
       
-      // Credenciais fixas para debug - sempre permitir o login do admin em desenvolvimento
-      if (email === 'admin@musicschool.com' && password === 'admin123') {
-        console.log('Login com admin direto');
-        const adminUser = {
-          id: '1',
-          name: 'Administrador',
-          email: 'admin@musicschool.com',
-          role: 'admin' as const
-        };
-        setUser(adminUser);
-        localStorage.setItem('musicschool_user', JSON.stringify(adminUser));
+      if (authenticatedUser) {
+        setUser(authenticatedUser);
+        saveUserToStorage(authenticatedUser);
         return true;
+      } else {
+        setError('Credenciais inválidas');
+        return false;
       }
-      
-      // Segunda credencial de teste
-      if (email === 'professor@musicschool.com' && password === 'professor123') {
-        console.log('Login com professor direto');
-        const teacherUser = {
-          id: '2',
-          name: 'Professor Demo',
-          email: 'professor@musicschool.com',
-          role: 'teacher' as const
-        };
-        setUser(teacherUser);
-        localStorage.setItem('musicschool_user', JSON.stringify(teacherUser));
-        return true;
-      }
-      
-      // Se chegou aqui, credenciais são inválidas
-      console.error('Login falhou: credenciais inválidas');
-      throw new Error('Credenciais inválidas');
     } catch (err) {
       console.error('Erro no login:', err);
-      setError(err as Error);
+      setError('Ocorreu um erro no login');
       return false;
     } finally {
       setLoading(false);
@@ -127,9 +69,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Logout
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('musicschool_user');
+    removeUserFromStorage();
   };
 
+  // Valor do contexto
   const value = {
     user,
     loading,

@@ -25,7 +25,8 @@ export default function AuthPage() {
     
     try {
       console.log('Tentando login com:', email, password);
-      const success = await login(email, password);
+      // Convertemos todas as strings para minúsculas para evitar problemas com diferenças de capitalização
+      const success = await login(email.toLowerCase().trim(), password.trim());
       if (success) {
         console.log('Login bem-sucedido, redirecionando...');
         setLocation('/');
