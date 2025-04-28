@@ -1,209 +1,217 @@
-import { useEffect } from 'react';
-import { useSchoolSettings } from '@/providers/SchoolSettingsProvider';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { Save, PaintBucket, Upload } from 'lucide-react';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useSchoolSettings } from "@/providers/SchoolSettingsProvider";
+import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
-const GeneralSettings = () => {
-  const { settings, updateSettings, saveSettings, isSaving } = useSchoolSettings();
+const settingsSchema = z.object({
+  schoolName: z.string().min(3, {
+    message: "O nome da escola deve ter pelo menos 3 caracteres.",
+  }),
+  schoolEmail: z.string().email({
+    message: "Por favor, insira um e-mail válido.",
+  }),
+  schoolPhone: z.string().min(10, {
+    message: "Por favor, insira um número de telefone válido.",
+  }),
+  schoolCnpj: z.string().min(14, {
+    message: "Por favor, insira um CNPJ válido.",
+  }),
+  schoolAddress: z.string().min(10, {
+    message: "O endereço deve ter pelo menos 10 caracteres.",
+  }),
+  weekdayHours: z.string().min(5, {
+    message: "Por favor, insira os horários de funcionamento de dias úteis.",
+  }),
+  weekendHours: z.string().min(5, {
+    message: "Por favor, insira os horários de funcionamento de fim de semana.",
+  }),
+});
+
+export function GeneralSettings() {
+  const { settings, updateSettings, isSaving, saveSettings } = useSchoolSettings();
   const { toast } = useToast();
 
-  const handleSaveSettings = async () => {
+  const form = useForm<z.infer<typeof settingsSchema>>({
+    resolver: zodResolver(settingsSchema),
+    defaultValues: {
+      schoolName: settings.schoolName,
+      schoolEmail: settings.schoolEmail,
+      schoolPhone: settings.schoolPhone,
+      schoolCnpj: settings.schoolCnpj,
+      schoolAddress: settings.schoolAddress,
+      weekdayHours: settings.weekdayHours,
+      weekendHours: settings.weekendHours,
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof settingsSchema>) {
     try {
+      updateSettings(values);
       await saveSettings();
       toast({
         title: "Configurações salvas",
-        description: "Suas configurações foram atualizadas com sucesso.",
+        description: "As configurações da escola foram atualizadas com sucesso.",
       });
     } catch (error) {
       toast({
         title: "Erro ao salvar",
-        description: "Não foi possível salvar as configurações.",
+        description: "Ocorreu um erro ao salvar as configurações.",
         variant: "destructive",
       });
     }
-  };
+  }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="schoolName">Nome da Escola</Label>
-          <Input 
-            id="schoolName" 
-            value={settings.schoolName} 
-            onChange={(e) => updateSettings({ schoolName: e.target.value })}
-            placeholder="Nome da sua escola de música" 
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="schoolEmail">Email de Contato</Label>
-          <Input 
-            id="schoolEmail" 
-            type="email" 
-            value={settings.schoolEmail}
-            onChange={(e) => updateSettings({ schoolEmail: e.target.value })}
-            placeholder="contato@suaescola.com" 
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="schoolPhone">Telefone</Label>
-          <Input 
-            id="schoolPhone" 
-            value={settings.schoolPhone}
-            onChange={(e) => updateSettings({ schoolPhone: e.target.value })}
-            placeholder="(00) 00000-0000" 
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="schoolCnpj">CNPJ</Label>
-          <Input 
-            id="schoolCnpj" 
-            value={settings.schoolCnpj}
-            onChange={(e) => updateSettings({ schoolCnpj: e.target.value })}
-            placeholder="00.000.000/0001-00" 
-          />
-        </div>
-        
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="schoolAddress">Endereço</Label>
-          <Input 
-            id="schoolAddress" 
-            value={settings.schoolAddress}
-            onChange={(e) => updateSettings({ schoolAddress: e.target.value })}
-            placeholder="Endereço completo da escola" 
-          />
-        </div>
-      </div>
-      
-      <div className="pt-4 border-t">
-        <h4 className="text-sm font-medium mb-2">Horário de Funcionamento</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="weekdayHours">Segunda a Sexta</Label>
-            <Input 
-              id="weekdayHours" 
-              value={settings.weekdayHours}
-              onChange={(e) => updateSettings({ weekdayHours: e.target.value })}
-              placeholder="08:00 - 18:00" 
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="weekendHours">Sábados</Label>
-            <Input 
-              id="weekendHours" 
-              value={settings.weekendHours}
-              onChange={(e) => updateSettings({ weekendHours: e.target.value })}
-              placeholder="09:00 - 13:00" 
-            />
-          </div>
-        </div>
-      </div>
-      
-      <div className="pt-4 border-t">
-        <h4 className="text-sm font-medium mb-2">Personalização</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="primaryColor">Cor Principal</Label>
-            <div className="flex space-x-2">
-              <Input 
-                id="primaryColor" 
-                value={settings.primaryColor}
-                onChange={(e) => updateSettings({ primaryColor: e.target.value })}
-                placeholder="#4f46e5" 
+    <Card>
+      <CardHeader>
+        <CardTitle>Configurações Gerais</CardTitle>
+        <CardDescription>
+          Gerencie as informações básicas da sua escola de música
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Informações da Escola</h3>
+              <Separator />
+              
+              <FormField
+                control={form.control}
+                name="schoolName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome da Escola</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nome da escola" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Este é o nome oficial da sua escola de música.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <div 
-                className="w-10 h-10 rounded border" 
-                style={{ backgroundColor: settings.primaryColor }}
-              >
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="schoolEmail"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>E-mail</FormLabel>
+                      <FormControl>
+                        <Input placeholder="contato@escolademusica.com.br" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="schoolPhone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Telefone</FormLabel>
+                      <FormControl>
+                        <Input placeholder="(11) 1234-5678" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="schoolCnpj"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CNPJ</FormLabel>
+                    <FormControl>
+                      <Input placeholder="00.000.000/0001-00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="schoolAddress"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Endereço</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Rua da Música, 123 - Bairro, Cidade - UF" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <h3 className="text-lg font-medium mt-6">Horários de Funcionamento</h3>
+              <Separator />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="weekdayHours"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Dias Úteis</FormLabel>
+                      <FormControl>
+                        <Input placeholder="09:00 - 18:00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="weekendHours"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Fim de Semana</FormLabel>
+                      <FormControl>
+                        <Input placeholder="10:00 - 14:00" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Código hexadecimal (ex: #4f46e5)
-            </p>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="secondaryColor">Cor Secundária</Label>
-            <div className="flex space-x-2">
-              <Input 
-                id="secondaryColor" 
-                value={settings.secondaryColor}
-                onChange={(e) => updateSettings({ secondaryColor: e.target.value })}
-                placeholder="#06b6d4" 
-              />
-              <div 
-                className="w-10 h-10 rounded border" 
-                style={{ backgroundColor: settings.secondaryColor }}
-              >
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Código hexadecimal (ex: #06b6d4)
-            </p>
-          </div>
-          
-          <div className="space-y-2 md:col-span-2">
-            <Label htmlFor="logoUpload">Logo da Escola</Label>
-            <div className="flex items-center gap-4">
-              {settings.logoUrl ? (
-                <div className="w-16 h-16 rounded border flex items-center justify-center overflow-hidden">
-                  <img 
-                    src={settings.logoUrl} 
-                    alt="Logo da escola" 
-                    className="max-w-full max-h-full object-contain"
-                  />
-                </div>
+            
+            <Button type="submit" disabled={isSaving}>
+              {isSaving ? (
+                <>
+                  <span className="mr-2">Salvando...</span>
+                  <span className="h-4 w-4 rounded-full border-2 border-r-transparent animate-spin" />
+                </>
               ) : (
-                <div className="w-16 h-16 rounded border flex items-center justify-center bg-gray-50 text-gray-400">
-                  <PaintBucket className="w-6 h-6" />
-                </div>
+                "Salvar Configurações"
               )}
-              <Button variant="outline" className="flex gap-2 items-center">
-                <Upload className="w-4 h-4" />
-                {settings.logoUrl ? 'Alterar logo' : 'Carregar logo'}
-              </Button>
-              {settings.logoUrl && (
-                <Button 
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => updateSettings({ logoUrl: null })}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  Remover
-                </Button>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Recomendado: imagem quadrada de pelo menos 200x200 pixels
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex justify-end pt-4">
-        <Button onClick={handleSaveSettings} disabled={isSaving} className="flex items-center gap-2">
-          {isSaving ? (
-            <>
-              <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Salvando...
-            </>
-          ) : (
-            <>
-              <Save className="h-4 w-4" />
-              Salvar alterações
-            </>
-          )}
-        </Button>
-      </div>
-    </div>
+            </Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
-};
-
-export default GeneralSettings;
+}
