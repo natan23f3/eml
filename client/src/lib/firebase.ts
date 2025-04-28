@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithRedirect, GoogleAuthProvider, signOut } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, limit } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -13,17 +12,111 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Google Auth Provider
-const googleProvider = new GoogleAuthProvider();
+// Database collections
+const studentsCollection = collection(db, 'students');
+const teachersCollection = collection(db, 'teachers');
+const coursesCollection = collection(db, 'courses');
+const classesCollection = collection(db, 'classes');
+const enrollmentsCollection = collection(db, 'enrollments');
+const paymentsCollection = collection(db, 'payments');
+const expensesCollection = collection(db, 'expenses');
+const communicationsCollection = collection(db, 'communications');
 
-// Sign in with Google
-const signInWithGoogle = () => signInWithRedirect(auth, googleProvider);
+// Helper functions para operações no banco de dados
+async function addDocument(collectionName: string, data: any, id?: string) {
+  const collectionRef = collection(db, collectionName);
+  
+  if (id) {
+    await setDoc(doc(collectionRef, id), {
+      ...data,
+      createdAt: new Date()
+    });
+    return id;
+  } else {
+    // Gerar ID automático
+    const newDocRef = doc(collectionRef);
+    await setDoc(newDocRef, {
+      ...data,
+      createdAt: new Date()
+    });
+    return newDocRef.id;
+  }
+}
 
-// Sign out
-const logOut = () => signOut(auth);
+async function updateDocument(collectionName: string, id: string, data: any) {
+  const docRef = doc(db, collectionName, id);
+  await updateDoc(docRef, {
+    ...data,
+    updatedAt: new Date()
+  });
+  return id;
+}
 
-export { auth, db, storage, signInWithGoogle, logOut };
+async function getDocument(collectionName: string, id: string) {
+  const docRef = doc(db, collectionName, id);
+  const docSnap = await getDoc(docRef);
+  
+  if (docSnap.exists()) {
+    return { id: docSnap.id, ...docSnap.data() };
+  } else {
+    return null;
+  }
+}
+
+async function getDocuments(collectionName: string, constraints?: { field: string, operator: any, value: any }[]) {
+  const collectionRef = collection(db, collectionName);
+  
+  let queryResult;
+  
+  if (constraints && constraints.length > 0) {
+    const queryConstraints = constraints.map(c => where(c.field, c.operator, c.value));
+    queryResult = query(collectionRef, ...queryConstraints);
+  } else {
+    queryResult = collectionRef;
+  }
+  
+  const querySnapshot = await getDocs(queryResult);
+  const documents: any[] = [];
+  
+  querySnapshot.forEach((doc) => {
+    documents.push({ id: doc.id, ...doc.data() });
+  });
+  
+  return documents;
+}
+
+async function deleteDocument(collectionName: string, id: string) {
+  const docRef = doc(db, collectionName, id);
+  await deleteDoc(docRef);
+  return id;
+}
+
+// Upload de arquivos
+async function uploadFile(path: string, file: File) {
+  const storageRef = ref(storage, path);
+  await uploadBytes(storageRef, file);
+  const downloadURL = await getDownloadURL(storageRef);
+  return downloadURL;
+}
+
+export { 
+  db, 
+  storage, 
+  studentsCollection,
+  teachersCollection,
+  coursesCollection,
+  classesCollection,
+  enrollmentsCollection,
+  paymentsCollection,
+  expensesCollection,
+  communicationsCollection,
+  addDocument,
+  updateDocument,
+  getDocument,
+  getDocuments,
+  deleteDocument,
+  uploadFile
+};

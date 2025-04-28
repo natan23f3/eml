@@ -1,79 +1,118 @@
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
-import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
-import { signInWithGoogle, logOut, auth } from '@/lib/firebase';
 
-interface AuthContextType {
-  user: FirebaseUser | null;
-  loading: boolean;
-  error: Error | null;
-  signIn: () => void;
-  signOut: () => Promise<void>;
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'teacher' | 'staff';
+  avatar?: string;
 }
 
-// Create context with a default value that matches the shape, but is clearly a placeholder
-// This helps with type checking without null checks everywhere
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  error: Error | null;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => void;
+  isAuthenticated: boolean;
+}
+
+// Valor padrão do contexto
 const defaultValue: AuthContextType = {
   user: null,
-  loading: true,
+  loading: false,
   error: null,
-  signIn: () => {
-    console.error("AuthContext not initialized");
-  },
-  signOut: async () => {
-    console.error("AuthContext not initialized");
-  }
+  login: async () => false,
+  logout: () => {},
+  isAuthenticated: false
 };
 
 const AuthContext = createContext<AuthContextType>(defaultValue);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-
+  
+  // Verificar no localStorage se há usuário salvo
   useEffect(() => {
-    console.log("Setting up auth state listener");
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      (user) => {
-        console.log("Auth state changed", user ? "User logged in" : "No user");
-        setUser(user);
-        setLoading(false);
-      },
-      (error) => {
-        console.error("Auth error:", error);
-        setError(error);
-        setLoading(false);
+    const savedUser = localStorage.getItem('musicschool_user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (err) {
+        console.error('Erro ao carregar usuário do localStorage:', err);
+        localStorage.removeItem('musicschool_user');
       }
-    );
-
-    // Cleanup subscription
-    return () => unsubscribe();
+    }
   }, []);
 
-  const signIn = () => {
-    signInWithGoogle().catch(error => {
-      console.error("Sign in error:", error);
-      setError(error as Error);
-    });
+  // Credenciais mock para desenvolvimento
+  const mockCredentials = [
+    { 
+      email: 'admin@musicschool.com',
+      password: 'admin123',
+      user: {
+        id: '1',
+        name: 'Administrador',
+        email: 'admin@musicschool.com',
+        role: 'admin' as const
+      }
+    },
+    { 
+      email: 'professor@musicschool.com',
+      password: 'professor123',
+      user: {
+        id: '2',
+        name: 'Professor Demo',
+        email: 'professor@musicschool.com',
+        role: 'teacher' as const
+      }
+    }
+  ];
+
+  // Simula login
+  const login = async (email: string, password: string): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Simular tempo de resposta da API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const foundUser = mockCredentials.find(
+        cred => cred.email === email && cred.password === password
+      );
+      
+      if (foundUser) {
+        setUser(foundUser.user);
+        // Salvar no localStorage
+        localStorage.setItem('musicschool_user', JSON.stringify(foundUser.user));
+        return true;
+      } else {
+        throw new Error('Credenciais inválidas');
+      }
+    } catch (err) {
+      setError(err as Error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const signOut = async () => {
-    try {
-      await logOut();
-      setUser(null);
-    } catch (error) {
-      console.error("Sign out error:", error);
-      setError(error as Error);
-    }
+  // Logout
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('musicschool_user');
   };
 
   const value = {
     user,
     loading,
     error,
-    signIn,
-    signOut
+    login,
+    logout,
+    isAuthenticated: !!user
   };
 
   return (
@@ -83,10 +122,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAuthContext() {
+export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuthContext must be used within an AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }
